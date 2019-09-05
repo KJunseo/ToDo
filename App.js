@@ -1,18 +1,47 @@
 import React from 'react';
-import { StyleSheet, Text, View, StatusBar, TextInput, Dimensions, Platform} from 'react-native';
+import { StyleSheet, Text, View, StatusBar, TextInput, Dimensions, Platform, ScrollView} from 'react-native';
+import ToDo from "./ToDo";
 
 const { height, width } = Dimensions.get("window");
 
-export default function App() {
-  return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content"></StatusBar>
-      <Text style={styles.title}>To Do App</Text>
-      <View style={styles.card}>
-        <TextInput style={styles.input} placeholder={"New To Do"}></TextInput>
+export default class App extends React.Component {
+  //새로운 state 생성
+  state={
+    newToDo: ""
+  };
+
+  render(){
+    const {newToDo} = this.state; //newToDo에 value를 주기
+
+    return ( 
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content"></StatusBar>
+        <Text style={styles.title}>To Do App</Text>
+        <View style={styles.card}>
+          <TextInput 
+            style={styles.input} 
+            placeholder={"New To Do"} 
+            value={newToDo} 
+            onChangeText={this._controlNewToDo}
+            placeholderTextColor={"#999"} 
+            returnKeyType={"done"}
+            autoCorrect={false}
+            >
+            </TextInput>
+            <ScrollView>
+              <ToDo></ToDo>
+            </ScrollView>
+        </View>
       </View>
-    </View>
-  );
+    );
+  }
+
+  //텍스트 값을 받아오는 함수를 하나 생성한다.
+  _controlNewToDo = text=>{
+    this.setState({
+      newToDo: text
+    });
+  };
 }
 
 const styles = StyleSheet.create({
@@ -45,11 +74,14 @@ const styles = StyleSheet.create({
         }
       },
       android: {   //안드로이드일 경우 
-        elevation: 3
+        elevation: 3  //아이폰일 경우 보다 옵션이 제한적 / 0~5 까지의 숫자 / 숫자가 클수록 쉐도우가 강한 것 
       }
     })
   },
   input: {
-
+    padding: 20,
+    borderBottomColor: "#bbb",
+    borderBottomWidth: 1,
+    fontSize: 25
   }
 });
