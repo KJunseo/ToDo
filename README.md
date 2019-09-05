@@ -1,2 +1,3 @@
-# ToDo
-To Do app - react native
+# To Do
+
+To Do App made with React Native
