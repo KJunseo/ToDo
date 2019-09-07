@@ -1,5 +1,6 @@
 import React,{Component} from "react";
-import {View, Text, TouchableOpacity, StyleSheet, Dimensions} from "react-native";
+import {View, Text, TouchableOpacity, StyleSheet, Dimensions, TextInput} from "react-native";
+import propTypes from "prop-types";
 
 const {width, height} = Dimensions.get("window");
  
@@ -7,13 +8,23 @@ const {width, height} = Dimensions.get("window");
 //stateless 컴포넌트가 아니라 클래스 컴포넌트를 만드는 이유는 수정 버튼을 누르면 state를 수정모드로 변경해야하기 위함.
 //따라서 stateful 컴포넌트가 필요하다.
 export default class ToDo extends Component{
-
-    state={
-        isEditing: false,     //수정모드인지 그냥 모드인지를 나타내는 state
-        isCompleted : false   //완료/미완료를 나타내는 state
+    constructor(props){
+        super(props);
+        this.state={
+                isEditing: false,     //수정모드인지 그냥 모드인지를 나타내는 state
+                toDoValue: props.text        
+        };
     }
+    static propTypes = {
+        text: propTypes.string.isRequired,
+        isCompleted: propTypes.bool.isRequired,
+        deleteToDo: propTypes.func.isRequired,
+        id: propTypes.string.isRequired
+    }
+
     render(){
-        const {isCompleted, isEditing} = this.state; //현재 state 값으로 isCompleted 설정
+        const {isCompleted, isEditing, toDoValue} = this.state; //현재 state 값으로 isCompleted 설정
+        const {text, id, deleteToDo}=this.props;
 
         return(
             <View style={styles.container}>
@@ -25,10 +36,21 @@ export default class ToDo extends Component{
                             ]}>
                         </View>
                     </TouchableOpacity>
+                    {isEditing ? (<TextInput style={[
+                        styles.text,
+                        styles.input,
+                        isCompleted ? styles.completedText : styles.uncompletedText]} 
+                        value={toDoValue} 
+                        multiline={true}
+                        onChange={this._controllInput}
+                        returnKeyType={"done"}
+                        onBlur={this._finishEditing}
+                        ></TextInput>):(
                     <Text style={[
                         styles.text, 
                         isCompleted ? styles.completedText : styles.uncompletedText
-                        ]}>Hello I'm To Do</Text>
+                        ]}>{text}</Text>
+                        )}
                 </View>
                 
                         {isEditing ?  /*수정할때 모드 */
@@ -46,7 +68,7 @@ export default class ToDo extends Component{
                                         <Text style={styles.actionText}>✏️</Text>
                                     </View>
                                 </TouchableOpacity>
-                                <TouchableOpacity>
+                                <TouchableOpacity onPressOut={()=> deleteToDo(id)}>
                                     <View style={styles.actionContainer}>
                                         <Text style={styles.actionText}>❌</Text>
                                     </View>
@@ -73,6 +95,9 @@ export default class ToDo extends Component{
         this.setState({
             isEditing: false
         })
+    }
+    _controllInput=(text)=>{
+        this.setState({ toDoValue:text })
     }
 }
 
@@ -114,7 +139,6 @@ const styles = StyleSheet.create({
     column: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
         width: width / 2
     },
     actions: {
@@ -123,5 +147,10 @@ const styles = StyleSheet.create({
     actionContainer: { //margin을 주는 이유, 아이콘만 정확하게 클릭하기 힘들기 때문에, 그 주변까지 인식되도록 하기위함 
         marginVertical: 10,
         marginHorizontal: 10
+    },
+    input: {
+        marginVertical: 15,
+        width: width/2,
+        paddingBottom: 5
     }
 });
