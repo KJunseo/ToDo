@@ -40,7 +40,14 @@ export default class App extends React.Component {
             >
             </TextInput>
             <ScrollView contentContainerStyle={styles.toDos}> 
-              {Object.values(toDos).map(toDo => <ToDo key={toDo.id} {...toDo} deleteToDo={this._deleteToDo}/>)}
+              {Object.values(toDos).map(toDo => 
+                <ToDo 
+                  key={toDo.id} {...toDo} 
+                  deleteToDo={this._deleteToDo}
+                  uncompleteToDo={this._uncompleteToDo}
+                  completeToDo={this._completeToDo}
+                  />
+              )}
             </ScrollView>
         </View> 
       </View>
@@ -90,6 +97,36 @@ export default class App extends React.Component {
       const newState={
         ...prevState,
         ...toDos
+      };
+      return {...newState};
+    });
+  };
+  _uncompleteToDo=(id)=>{
+    this.setState(prevState=>{
+      const newState = {
+        ...prevState, //원래 기존에 가지고 있던 것 
+        toDos: {  // 플러스 toDos, 만약 이 function이 toDos를 발견하면 덮어쓴다.
+          ...prevState.toDos, //원래 기존에 가지고 있던 toDos를 주고,  
+          [id]: { //만약 위의 id값을 가지고 있는 항목이 이미 있다면, 덮어쓴다. 
+            ...prevState.toDos[id], //덮어쓴 후, 이 id값 이전 값들을 받아온다.(text, id, createAt, isCompleted)
+            isCompleted: false //미완료상태로 설정해준다. 
+          }
+        }
+      }
+      return {...newState};
+    })
+  }
+  _completeToDo=(id)=>{
+    this.setState(prevState=>{
+      const newState = {
+        ...prevState, //원래 기존에 가지고 있던 것 
+        toDos: {  // 플러스 toDos, 만약 이 function이 toDos를 발견하면 덮어쓴다.
+          ...prevState.toDos, //원래 기존에 가지고 있던 toDos를 주고,  
+          [id]: { //만약 위의 id값을 가지고 있는 항목이 이미 있다면, 덮어쓴다. 
+            ...prevState.toDos[id], //덮어쓴 후, 이 id값 이전 값들을 받아온다.(text, id, createAt, isCompleted)
+            isCompleted: true //완료상태로 설정해준다. 
+          }
+        }
       }
       return {...newState};
     })
