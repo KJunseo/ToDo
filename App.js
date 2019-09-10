@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Text, View, StatusBar, TextInput, Dimensions, Platform, ScrollView} from 'react-native';
+import { StyleSheet, Text, View, StatusBar, TextInput, Dimensions, Platform, ScrollView, AsyncStorage} from 'react-native';
 import ToDo from "./ToDo";
 import {AppLoading} from "expo";
 import uuidv1 from "uuid/v1"; //uuid version 1
@@ -37,15 +37,16 @@ export default class App extends React.Component {
             returnKeyType={"done"}
             autoCorrect={false}
             onSubmitEditing={this._addToDo}
-            >
-            </TextInput>
+            /> 
             <ScrollView contentContainerStyle={styles.toDos}> 
-              {Object.values(toDos).map(toDo => 
+              {Object.values(toDos).reverse().map(toDo => 
                 <ToDo 
-                  key={toDo.id} {...toDo} 
+                  key={toDo.id}
                   deleteToDo={this._deleteToDo}
                   uncompleteToDo={this._uncompleteToDo}
                   completeToDo={this._completeToDo}
+                  updateToDo={this._updateToDo}
+                  {...toDo} 
                   />
               )}
             </ScrollView>
@@ -60,10 +61,18 @@ export default class App extends React.Component {
       newToDo: text
     });
   };
-  _loadToDos =()=>{
-    this.setState({
-      loadedToDos: true
-    })
+  _loadToDos =async()=>{
+    try{
+      const toDos = await AsyncStorage.getItem("toDos"); //key값이 toDos인 객체를 디스크에서 가져온다. 이 function을 위해 기다려야하므로 await을 붙여준다.
+      const parsedToDos = JSON.parse(toDos);
+      console.log(parsedToDos);
+      this.setState({
+        loadedToDos: true,
+        toDos: parsedToDos
+      })
+    } catch(err){
+      console.log(err);
+    }
   }
   _addToDo=()=>{
     const {newToDo} = this.state; //newToDo를 state에서 가져와 
@@ -86,6 +95,7 @@ export default class App extends React.Component {
             ...newToDoObject //새로운 toDo 오브젝트
           }
         };
+        this._saveToDos(newState.toDos);
         return { ...newState};
       });
     }
@@ -98,6 +108,7 @@ export default class App extends React.Component {
         ...prevState,
         ...toDos
       };
+      this._saveToDos(newState.toDos);
       return {...newState};
     });
   };
@@ -113,6 +124,7 @@ export default class App extends React.Component {
           }
         }
       }
+      this._saveToDos(newState.toDos);
       return {...newState};
     })
   }
@@ -128,8 +140,30 @@ export default class App extends React.Component {
           }
         }
       }
+      this._saveToDos(newState.toDos);
       return {...newState};
     })
+  }
+  _updateToDo=(id, text)=>{
+    this.setState(prevState=>{
+      const newState = {
+        ...prevState, //원래 기존에 가지고 있던 것 (newToDo, loadedToDo, toDos)
+        toDos: {  // 플러스 toDos, 만약 이 function이 toDos를 발견하면 덮어쓴다.
+          ...prevState.toDos, //원래 기존에 가지고 있던 toDos를 주고,  
+          [id]: { //만약 위의 id값을 가지고 있는 항목이 이미 있다면, 덮어쓴다. 
+            ...prevState.toDos[id], //덮어쓴 후, 이 id값 이전 값들을 받아온다.(text, id, createAt, isCompleted)
+            text: text //text값을 받아온 새로운 text로 업데이트한다.
+          }
+        }
+      };
+      this._saveToDos(newState.toDos);
+      return {...newState};
+    });
+  };
+  //전체 state를 저장하지 않고, toDos 객체만 저장할 것이다. 
+  _saveToDos = (newToDos)=>{
+    console.log(JSON.stringify(newToDos));
+    const saveToDos = AsyncStorage.setItem("toDos", JSON.stringify(newToDos)); // toDos가 key값이다. vaule 값은 newToTos이다. 
   }
 }
 
