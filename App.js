@@ -37,6 +37,7 @@ export default class App extends React.Component {
             returnKeyType={"done"}
             autoCorrect={false}
             onSubmitEditing={this._addToDo}
+            underlineColorAndroid={"transparent"}
             /> 
             <ScrollView contentContainerStyle={styles.toDos}> 
               {Object.values(toDos).reverse().map(toDo => 
@@ -65,10 +66,9 @@ export default class App extends React.Component {
     try{
       const toDos = await AsyncStorage.getItem("toDos"); //key값이 toDos인 객체를 디스크에서 가져온다. 이 function을 위해 기다려야하므로 await을 붙여준다.
       const parsedToDos = JSON.parse(toDos);
-      console.log(parsedToDos);
       this.setState({
         loadedToDos: true,
-        toDos: parsedToDos
+        toDos: parsedToDos || {}
       })
     } catch(err){
       console.log(err);

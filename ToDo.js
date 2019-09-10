@@ -48,6 +48,7 @@ export default class ToDo extends Component{
                         onChange={(event) => this._controllInput( event.nativeEvent.text )}
                         returnKeyType={"done"}
                         onBlur={this._finishEditing}
+                        underlineColorAndroid={"transparent"}
                         ></TextInput>):(
                     <Text style={[
                         styles.text, 
